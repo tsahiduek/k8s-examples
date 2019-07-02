@@ -1,0 +1,80 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: pvc-az-b-svc
+spec:
+  type: NodePort
+  selector:
+    app: pvc-az-b
+    tier: backend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: http
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: sc-az-b
+provisioner: kubernetes.io/aws-ebs
+parameters:
+  type: gp2
+  fsType: ext4
+allowedTopologies:
+  - matchLabelExpressions:
+      - key: failure-domain.beta.kubernetes.io/zone
+        values:
+          - us-west-2b
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-az-b-pvc
+  labels:
+    app: pvc-az-b
+spec:
+  storageClassName: sc-az-b
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pvc-az-b-depl
+spec:
+  selector:
+    matchLabels:
+      app: pvc-az-b
+      tier: backend
+      track: stable
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: pvc-az-b
+        tier: backend
+        track: stable
+    spec:
+      containers:
+        - name: pvc-az-b
+          image: "gcr.io/google-samples/hello-go-gke:1.0"
+          ports:
+            - name: http
+              containerPort: 80
+          resources:
+            requests:
+              memory: "1024Mi"
+              cpu: "500m"
+            limits:
+              memory: "2048Mi"
+              cpu: "1000m"
+          volumeMounts:
+            - mountPath: "/home"
+              name: pvc-az-b-vol
+      volumes:
+        - name: pvc-az-b-vol
+          persistentVolumeClaim:
+            claimName: pvc-az-b-pvc
