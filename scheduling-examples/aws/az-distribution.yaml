@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pod-az-distribution
+spec:
+  selector:
+    matchLabels:
+      app: pod-az-distribution
+      tier: backend
+      track: stable
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: pod-az-distribution
+        tier: backend
+        track: stable
+    spec:
+      containers:
+        - name: pod-az-distribution
+          image: "gcr.io/google-samples/hello-go-gke:1.0"
+          ports:
+            - name: http
+              containerPort: 80
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "10m"
+            limits:
+              memory: "1024Mi"
+              cpu: "500m"
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: name
+                      operator: equals
+                      values:
+                        - pod-az-distribution
+                topologyKey: failure-domain.beta.kubernetes.io/zone
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: name
+                      operator: equals
+                      values:
+                        - pod-az-distribution
+              topologyKey: failure-domain.beta.kubernetes.io/host
