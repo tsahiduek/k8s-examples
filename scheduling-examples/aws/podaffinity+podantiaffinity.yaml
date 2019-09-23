@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pod-od-depl
+spec:
+  selector:
+    matchLabels:
+      name: pod-affinity
+      service: core
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        name: pod-affinity
+        service: core
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: service
+                    operator: NotIn
+                    values:
+                      - core
+              topologyKey: failure-domain.beta.kubernetes.io/host
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 1
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: service
+                      operator: NotIn
+                      values:
+                        - core
+                topologyKey: failure-domain.beta.kubernetes.io/zone
+      containers:
+        - name: nodeselector-linux
+          image: "gcr.io/google-samples/hello-go-gke:1.0"
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1024Mi"
+              cpu: "500m"

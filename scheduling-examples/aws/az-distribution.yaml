@@ -37,17 +37,7 @@ spec:
                 labelSelector:
                   matchExpressions:
                     - key: name
-                      operator: equals
+                      operator: In
                       values:
                         - pod-az-distribution
                 topologyKey: failure-domain.beta.kubernetes.io/zone
-          requiredDuringSchedulingIgnoredDuringExecution:
-            - weight: 100
-              podAffinityTerm:
-                labelSelector:
-                  matchExpressions:
-                    - key: name
-                      operator: equals
-                      values:
-                        - pod-az-distribution
-              topologyKey: failure-domain.beta.kubernetes.io/host
