@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: antiaffinity-host
+spec:
+  selector:
+    matchLabels:
+      app: antiaffinity-host
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: antiaffinity-host
+    spec:
+      containers:
+        - name: antiaffinity-host
+          image: "gcr.io/google-samples/hello-go-gke:1.0"
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1024Mi"
+              cpu: "500m"
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - antiaffinity-host
+              topologyKey: kubernetes.io/hostname

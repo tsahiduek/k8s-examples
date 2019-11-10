@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nodeselector-linux-depl
+spec:
+  selector:
+    matchLabels:
+      app: nodeselector-linux
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nodeselector-linux
+    spec:
+      containers:
+        - name: nodeselector-linux
+          image: "gcr.io/google-samples/hello-go-gke:1.0"
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1024Mi"
+              cpu: "500m"
+      nodeSelector:
+        beta.kubernetes.io/instance-type: c5.9xlarge
