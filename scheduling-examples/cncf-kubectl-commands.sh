@@ -13,12 +13,15 @@ k get pods -lservice=core -o wide
 
 # deploy 1 pod not with service=core
 k apply -f pod-antiaffinity.yaml
+k get pods -lservice=not-core -o wide
 
 # deploy 1 pod per host
 k apply -f deployment-ha-host.yaml
+k get pods -lapp=antiaffinity-host -o wide
 
 # deploy 1 pod per host spread AZ
 k apply -f deployment-ha-host-zone.yaml
+k get pods -lapp=pod-ha-host-zone -o wide
 
 
 # cleanup
